@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Update Profile | BUYROUTE</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --accent: #ffc107;
+      --muted: #cbd5e1;
+    }
+
+    html,body { height:100%; margin:0; }
+
+    body {
+      background: url("https://img.freepik.com/premium-vector/geometric-gradient-technology-background_23-2149110132.jpg")
+        no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      padding: 20px;
+    }
+
+    .card-form {
+      width: 420px;
+      max-width: 95%;
+      background: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      padding: 28px;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(6px);
+    }
+
+    .card-form h4 { text-align:center; margin-bottom:18px; font-weight:700; }
+
+    .form-label { font-weight:600; color: var(--muted); }
+
+    .form-control {
+      border-radius:8px;
+      border: none;
+      padding: 10px 12px;
+    }
+
+    .profile-img {
+      display:block;
+      margin: 12px auto;
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.18);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .btn-warning {
+      width: 100%;
+      font-weight: 700;
+      color: #111;
+      border-radius: 8px;
+    }
+
+    .controls {
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .controls .btn {
+      flex:1;
+      border-radius:8px;
+    }
+
+    .flash {
+      max-width:420px;
+      margin: 10px auto;
+      text-align:center;
+      color: bisque;
+      font-weight:600;
+    }
+
+    @media (max-width:480px){
+      .profile-img { width:140px; height:140px; }
+      .card-form { padding:18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Flash messages (centered above the form) -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash alert alert-{{ category }}">{{
+          message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form class="card-form" method="post" enctype="multipart/form-data" aria-label="Update profile form">
+    <h4>Update Profile</h4>
+
+    <div class="mb-3">
+      <label class="form-label" for="adminname">Admin Name</label>
+      <input id="adminname" name="adminname" type="text" class="form-control" value="{{ admin_details[1] }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="address">Address</label>
+      <input id="address" name="address" type="text" class="form-control" value="{{ admin_details[3] }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="ph_no">Phone No</label>
+      <input id="ph_no" name="ph_no" type="tel" class="form-control" value="{{ admin_details[2] }}" required>
+    </div>
+
+    <!-- Current image preview -->
+    <img id="preview" src="/static/uploads/{{ admin_details[4] }}" alt="Profile image" class="profile-img">
+
+    <div class="mb-3">
+      <label class="form-label" for="formFile">Upload New Image (optional)</label>
+      <input class="form-control" type="file" id="formFile" name="file" accept="image/*">
+      <small class="text-muted">Choose an image to replace the existing profile photo.</small>
+    </div>
+
+    <div class="controls">
+      <button type="submit" class="btn btn-warning">Save Changes</button>
+      <a href="{{ url_for('admindashboard') }}" class="btn btn-outline-light">Back</a>
+    </div>
+  </form>
+
+  <script>
+    // preview uploaded image in the <img id="preview">
+    const fileInput = document.getElementById('formFile');
+    const previewImg = document.getElementById('preview');
+
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        if (!f.type.startsWith('image/')) {
+          alert('Please select an image file.');
+          e.target.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => previewImg.src = ev.target.result;
+        reader.readAsDataURL(f);
+      });
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

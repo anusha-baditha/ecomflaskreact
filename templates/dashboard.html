@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(#f7eaea, #a7a4a4);
+            background-attachment: fixed;
+        }
+
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-img-top {
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .card-body h5 {
+            font-weight: 600;
+        }
+
+        .quantity {
+            margin: 7px 0;
+        }
+
+        .buy-btn, .cart-btn {
+            width: 48%;
+        }
+
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .card-img-top {
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .buy-btn, .cart-btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <center style="color: white; font-weight: bold; margin-top:10px;">{{ message }}</center>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <section class="container py-5">
+        <div class="row g-4">
+
+            {% for i in allitems_data %}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                <div class="card">
+
+                    <!-- Product Image -->
+                    <a href="#">
+                        <img src="/static/uploads/{{i[7]}}" alt="Product Image" class="card-img-top">
+                    </a>
+
+                    <div class="card-body">
+                        <a href="#" style="text-decoration:none; color:black;">
+                            <h5>Name: {{i[1][:20]}}</h5>
+                        </a>
+                        <p class="text-muted m-0">ID:{{i[0]}} </p>
+                        <p class="m-0"><strong>Price:</strong> ₹{{i[4]}}</p>
+                        <p class="m-0"><strong>Stock:{{i[5]}}</strong> </p>
+                        <p class="m-0"><strong>Category:{{i[6]}}</strong> </p>
+                        <form method="post" action="{{url_for('buy_now')}}">
+                            <input type="hidden" name="itemid" value="{{i[0]}}">
+                            <label class="mt-2"><strong>Select Quantity</strong></label>
+                            <select name="qyt" class="form-select quantity">
+                                {% for q in range(1, 11) %}
+                                <option value="{{ q }}">{{ q }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <div class="d-flex justify-content-between mt-2">
+                                <button class="btn btn-success buy-btn">Buy Now</button>
+                                <a href="{{url_for('addcart',itemid=i[0])}}" class="btn btn-danger cart-btn">Add Cart</a>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

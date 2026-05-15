@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cart | BUYROUTE</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --accent: #ffe082;
+      --glass: rgba(255,255,255,0.92);
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      min-height:100vh;
+      margin:0;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background-image: url("https://img.freepik.com/free-photo/futuristic-metaverse-empty-room-product-display-presentation-abstract-technology-scifi-with-neon-light-3d-background_56104-2314.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #111;
+      padding: 28px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 20px;
+    }
+
+    .logo { width:56px; height:56px; }
+
+    .card-wrap{
+      max-width:1200px;
+      margin: 0 auto;
+    }
+
+    .cart-card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(250,250,250,0.94));
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .cart-list {
+      width:100%;
+    }
+
+    .cart-item{
+      display:grid;
+      grid-template-columns: 100px 1fr 120px 120px;
+      gap: 12px;
+      align-items:center;
+      padding: 12px 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .cart-item:last-child { border-bottom: none; }
+
+    .item-img img{
+      width: 100px;
+      height: 80px;
+      object-fit:cover;
+      border-radius:8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    }
+
+    .item-title { font-weight:700; margin-bottom:6px; }
+    .item-meta { color: var(--muted); font-size: .92rem; }
+
+    .qty-box {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .qty-box input[type="number"]{
+      width:64px;
+      padding:6px 8px;
+      border-radius:6px;
+      border:1px solid rgba(0,0,0,0.12);
+      text-align:center;
+    }
+
+    .small-btn {
+      padding:6px 8px;
+      font-size:.85rem;
+    }
+
+    .price {
+      text-align:right;
+      font-weight:700;
+      font-size:1rem;
+    }
+
+    .summary {
+      margin-top:14px;
+      display:flex;
+      justify-content:flex-end;
+    }
+
+    .summary-box{
+      width:320px;
+      background: rgba(255,255,255,0.98);
+      padding:16px;
+      border-radius:10px;
+      border:1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .summary-row { display:flex; justify-content:space-between; margin-bottom:10px; color:#374151; }
+    .grand { font-size:1.25rem; font-weight:800; color: #111; }
+
+    .actions { display:flex; gap:10px; margin-top:12px; }
+
+    .empty-state{
+      text-align:center;
+      padding:48px;
+      color:#fff;
+      font-weight:600;
+    }
+
+    @media (max-width:880px){
+      .cart-item { grid-template-columns: 80px 1fr 100px; grid-auto-rows: auto; }
+      .price { grid-column: 3 /4; text-align:right; }
+      .qty-box { justify-content:flex-start; grid-column: 2/3; }
+      .summary { justify-content:center; margin-top:18px; }
+      .summary-box { width:100%; }
+      .item-img img{ width:80px; height:60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card-wrap">
+
+    <div class="topbar">
+      <a href="{{ url_for('home') }}" aria-label="BUYROUTE home"><img src="/static/BUYROUTE.png" alt="BUYROUTE" class="logo"></a>
+      <div style="color: white; font-weight:700; font-size:1.1rem;">Your Cart</div>
+      <div></div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="mb-3">
+          {% for msg in messages %}
+            <div class="alert alert-info" role="alert">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if not items_data %}
+      <div class="empty-state">
+        Your cart is empty. <a href="{{ url_for('home') }}" style="color: #ffe082; text-decoration:underline;">Continue shopping</a>
+      </div>
+    {% else %}
+    <div class="cart-card">
+      <div class="cart-list" role="list">
+        <!-- Header row -->
+        <div style="display:grid; grid-template-columns: 100px 1fr 120px 120px; gap:12px; padding:8px 8px; border-bottom:1px solid rgba(0,0,0,0.06); margin-bottom:6px;">
+          <div style="font-weight:700; color:#374151;">Product</div>
+          <div></div>
+          <div style="text-align:right; font-weight:700; color:#374151;">Quantity</div>
+          <div style="text-align:right; font-weight:700; color:#374151;">Subtotal</div>
+        </div>
+
+        {% for item in items_data %}
+        {# assume item = [id, name, price, quantity, img, category] adjust indexes if needed #}
+        <div class="cart-item" role="listitem" aria-label="Cart item {{ item[1] }}">
+          <div class="item-img">
+            <a href="#">
+            <img src="/static/uploads/{{item[5] }}" alt="{{ item[1] }}"></a>
+          </div>
+
+          <div>
+            <div class="item-title">{{ item[1] }}</div>
+            <div class="item-meta">Category: {{ item[4] if item|length > 5 else 'N/A' }} &nbsp; • &nbsp; Price: ₹{{ item[2] }}</div>
+          </div>
+
+          <div>
+            <!-- Update quantity form -->
+            <form method="post" action="{{url_for('updatecart',itemid=item[0])}}" class="qty-box" aria-label="Update quantity for {{ item}}">
+              <input type="number" name="quantity" min="1" value="{{ item[3] }}" required>
+              <button type="submit" class="btn btn-outline-secondary small-btn">Update</button>
+            </form>
+
+            <!-- Remove action on small screens -->
+            <div style="margin-top:8px; display:block;" class="remove-mobile">
+              <a href="{{url_for('removecart',itemid=item[0])}}">
+                <button type="submit" class="btn btn-danger btn-sm small-btn">Remove</button>
+              </a>
+            </div>
+          </div>
+
+           <div class="price">₹ {{ (item[2] * item[3]) | round(2) }}</div> 
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="summary" aria-hidden="false">
+        <div class="summary-box">
+          <div class="summary-row"><div>Items total</div><div>₹ {{subtotal}}</div></div>
+          <div class="summary-row"><div>Delivery</div><div>₹ {{ delivery if delivery is defined else '0.00' }}</div></div>
+          <div class="summary-row"><div>Tax</div><div>₹ {{ tax if tax is defined else '0.00' }}</div></div>
+          <div style="height:1px; background: rgba(0,0,0,0.06); margin:8px 0;"></div>
+          <div class="summary-row grand"><div>Grand total</div><div>₹ {{grand_total}}</div></div>
+
+          <div class="actions">
+            <a href="{{ url_for('home') }}" class="btn btn-outline-secondary w-100">Continue Shopping</a>
+            <form action="{{url_for('pay_cart')}}" class="d-inline" style="width:100%;">
+              <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(90deg,#ffd54a,#ffb74d); border:none; margin-top:8px;">Checkout</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // small enhancement: confirm removal on desktop (buttons inside forms will still submit)
+    document.querySelectorAll('form[action*="removecart"]').forEach(f=>{
+      f.addEventListener('submit', function(e){
+        if(!confirm('Remove this item from cart?')) e.preventDefault();
+      });
+    });
+  </script>
+</body>
+</html>

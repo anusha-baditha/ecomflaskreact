@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{{ storeditem_data[1] }} | BUYROUTE</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --accent: #ffe082;
+      --muted: #6b7280;
+    }
+
+    body{
+      min-height:100vh;
+      margin:0;
+      font-family:"Poppins",system-ui;
+      background-image:url("https://img.freepik.com/free-photo/futuristic-metaverse-empty-room-product-display-presentation-abstract-technology-scifi-with-neon-light-3d-background_56104-2314.jpg");
+      background-size:cover;
+      background-repeat:no-repeat;
+      background-attachment:fixed;
+      padding:28px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:20px;
+    }
+
+    .logo{
+      width:56px;
+      height:56px;
+    }
+
+    .page-card{
+      max-width:1000px;
+      margin:auto;
+      background:linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,250,250,0.94));
+      border-radius:12px;
+      padding:25px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.25);
+      border:1px solid rgba(0,0,0,0.06);
+    }
+
+    .product-container{
+      display:flex;
+      gap:30px;
+      flex-wrap:wrap;
+    }
+
+    .product-img{
+      width:350px;
+      border-radius:14px;
+      border:1px solid #ddd;
+      box-shadow:0 4px 10px rgba(0,0,0,0.10);
+    }
+
+    .btn-buy{
+      background:linear-gradient(90deg,#ffd54a,#ffb74d);
+      border:none;
+      padding:10px 20px;
+      font-weight:600;
+      border-radius:6px;
+    }
+
+    .btn-review{
+      background:white;
+      border:2px solid #ffb74d;
+      padding:8px 18px;
+      font-weight:600;
+      border-radius:6px;
+      transition:0.2s;
+    }
+
+    .btn-review:hover{
+      background:#ffe082;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <a href="{{ url_for('home') }}"><img src="/static/BUYROUTE.png" class="logo"></a>
+    <h3 style="color:white;font-weight:700;">Item Details</h3>
+    <div></div>
+  </div>
+
+  <!-- FLASH MESSAGES -->
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="mb-3">
+        {% for msg in messages %}
+          <div class="alert alert-info">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="page-card">
+
+    <div class="product-container">
+
+      <!-- PRODUCT IMAGE -->
+      <div>
+        <img src="/static/uploads/{{ storeditem_data[7] }}" class="product-img">
+      </div>
+
+      <!-- PRODUCT DETAILS -->
+      <div style="flex:1;">
+        
+        <h2 style="font-weight:800; margin-bottom:15px;">
+          {{ storeditem_data[1] }}
+        </h2>
+
+        <p style="font-size:1.1rem; color:#333;">
+          {{ storeditem_data[2] }}
+        </p>
+
+        <h4 style="margin-top:20px;">
+          <strong>Price:</strong> ₹{{ storeditem_data[4] }}
+        </h4>
+
+        <p><strong>Category:</strong> {{ storeditem_data[6] }}</p>
+        <p><strong>Available Stock:</strong> {{ storeditem_data[5] }}</p>
+        <p><strong>About :</strong> {{ storeditem_data[3] }}</p>
+
+        <br>
+
+        <!-- BUTTONS SECTION -->
+        <div style="margin-top:20px;">
+          <a href="{{ url_for('home') }}" class="btn btn-secondary me-2">Back</a>
+          <form method="post" action="{{url_for('buy_now')}}">
+                <input type="hidden" name="itemid" value="{{storeditem_data[0]}}">
+            <button class="btn-buy me-2">Buy Now</button>
+          </form>
+
+          <a href="{{url_for('addreview',itemid=storeditem_data[0])}}" 
+             class="btn-review me-2">
+             Add Review
+          </a>
+
+          <a href="#" 
+             class="btn-review">
+             Read Reviews
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

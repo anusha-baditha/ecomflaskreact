@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update storeditem</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+
+  <style>
+    body {
+      background-image: url(https://img.freepik.com/free-photo/futuristic-metaverse-empty-room-product-display-presentation-abstract-technology-scifi-with-neon-light-3d-background_56104-2314.jpg);
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-storeditems: center;
+      min-height: 100vh;
+      color: white;
+      font-family: "Poppins", sans-serif;
+    }
+
+    form {
+      width: 420px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 10px;
+      padding: 25px;
+      background: linear-gradient(rgba(255, 0, 0, 0.507), rgba(131, 186, 111, 0.507));
+      box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    form label {
+      font-weight: 500;
+    }
+
+    .form-control {
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    .box {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-img-top {
+      display: block;
+      margin: 10px auto;
+      border-radius: 10px;
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-warning {
+      width: 100%;
+      font-weight: bold;
+      color: black;
+      transition: 0.3s;
+    }
+
+    .btn-warning:hover {
+      background-color: #ffcd38;
+      transform: scale(1.05);
+    }
+
+    h3 {
+      text-align: center;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    select {
+      border-radius: 6px;
+      border: none;
+      padding: 5px 10px;
+    }
+
+    input[type="file"] {
+      color: #111;
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      form {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <center style="color: bisque;">{{ message }}</center>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<body>
+  <form method="post" enctype="multipart/form-data">
+    <h3>Update storeditem</h3>
+
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label">Name</label>
+      <input type="text" class="form-control" id="exampleFormControlInput1"
+        placeholder="Title of the storeditem" name="title" value="{{item_data[1]}}" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="exampleFormControlTextarea1" class="form-label">Description</label>
+      <textarea class="form-control" id="exampleFormControlTextarea1"
+        placeholder="Description of the storeditem" name="Description" rows="4"
+        required>{{item_data[2]}}</textarea>
+    </div>
+    <div class="mb-3">
+      <label for="exampleFormControlTextarea1" class="form-label">About the item</label>
+      <textarea class="form-control" id="exampleFormControlTextarea1"
+        placeholder="Description of the storeditem" name="About_item" rows="4"
+        required>{{item_data[3]}}</textarea>
+    </div>
+
+    <div class="box mb-3">
+      <div>
+        <label class="form-label">Quantity</label>
+        <input type="number" class="form-control" name="quantity"
+          value="{{item_data[5]}}" required />
+      </div>
+
+      <div>
+        <label class="form-label">Price</label>
+        <input type="number" class="form-control" name="price"
+          value="{{item_data[4]}}" required />
+      </div>
+
+      <div>
+        <label class="form-label">Category</label>
+        <select name="category" class="form-select" required>
+          <option value="Home_Appliences" {% if item_data[6] == 'Home_Appliences' %}selected{% endif %}>Home Appliances</option>
+          <option value="grocery" {% if item_data[6] == 'grocery' %}selected{% endif %}>Grocery</option>
+          <option value="Fashion" {% if item_data[6] == 'Fashion' %}selected{% endif %}>Fashion</option>
+          <option value="Electronics" {% if item_data[6] == 'Electronics' %}selected{% endif %}>Electronics</option>
+          <option value="sports" {% if item_data[6] == 'sports' %}selected{% endif %}>Sports</option>
+          <option value="toys" {% if item_data[6] == 'toys' %}selected{% endif %}>Toys</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3 text-center">
+      <img src="/static/uploads/{{item_data[7]}}" class="card-img-top" alt="storeditem Image">
+      <label for="formFile" class="form-label mt-2">Change Image (optional)</label>
+      <input class="form-control" type="file" name="file" id="formFile" />
+    </div>
+
+    <button class="btn btn-warning mt-2">Update storeditem</button>
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+</body>
+</html>

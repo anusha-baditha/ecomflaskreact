@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: url("https://img.freepik.com/premium-vector/geometric-gradient-technology-background_23-2149110132.jpg") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .navbar {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      margin-right: 1%;
+    }
+
+    ul li a {
+      color: #000 !important;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .welcome-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(8px);
+      border-radius: 15px;
+      padding: 50px 70px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .welcome-box h1 {
+      font-size: 2rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    .welcome-box span {
+      display: block;
+      font-size: 3.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #ff3b3b, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+      <img src="/static/BUYROUTE.png" alt="Logo" class="logo" />
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" href="{{url_for('additem')}}">Add Item</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{url_for('viewallitems')}}">View All Items</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{url_for('adminprofileupdate')}}">Update Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{{url_for('adminlogout')}}">Logout</a>
+          </li>
+        </ul>
+        {{session.get('admin')}}
+        <form class="d-flex" method="post" action="#">
+          <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div class="welcome-box">
+    <h1>Welcome to</h1>
+    <span>BUYROUTE</span>
+    <h1>Admin Panel</h1>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

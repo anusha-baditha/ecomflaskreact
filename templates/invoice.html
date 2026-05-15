@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice {{ order_data[0] }}</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .invoice-box {
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #000;
+        }
+
+        h2, h4, h5, p {
+            margin: 4px 0;
+        }
+
+        .header-table {
+            width: 100%;
+        }
+
+        .header-table td {
+            vertical-align: top;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .table th, .table td {
+            border: 1px solid #000;
+            padding: 6px;
+        }
+
+        .totals-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .totals-table td {
+            padding: 5px;
+        }
+
+        .no-border {
+            border: none;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .center {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="invoice-box">
+
+    <!-- Header -->
+    <table class="header-table">
+        <tr>
+            <td>
+                <h2>INVOICE</h2>
+                <p>
+                    <strong>Invoice ID:</strong> {{ order_data[1] }}<br>
+                    <strong>Date:</strong> {{ order_data[9] }}
+                </p>
+            </td>
+            <td class="text-right">
+                <h4>Your Company Name</h4>
+                <p>
+                    123 Business St.<br>
+                    City, Country<br>
+                    Email: support@example.com
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <!-- Billing -->
+    <h5>Bill To:</h5>
+    <p>
+        {{ order_data[1] }}<br>
+        {{ order_data[2] }}<br>
+        {% if orders_itemsdata %}
+            {{ orders_itemsdata[0][2] }}
+        {% endif %}
+    </p>
+
+    <hr>
+
+    <!-- Items -->
+    <h5>Order Items</h5>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in orders_itemsdata %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+                <td>{{ item[5] }}</td>
+                <td>{{ item[5] * item[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <!-- Totals -->
+    <table class="totals-table">
+        <tr>
+            <td class="no-border"></td>
+            <td class="text-right bold">Subtotal:</td>
+            <td class="text-right">{{ order_data[4] }}</td>
+        </tr>
+        <tr>
+            <td class="no-border"></td>
+            <td class="text-right bold">Tax (5%):</td>
+            <td class="text-right">{{ order_data[6] }}</td>
+        </tr>
+        <tr>
+            <td class="no-border"></td>
+            <td class="text-right bold">Total:</td>
+            <td class="text-right bold">{{ order_data[7] }}</td>
+        </tr>
+    </table>
+
+    <hr>
+
+    <p class="center">Thank you for your purchase!</p>
+
+</div>
+</body>
+</html>
