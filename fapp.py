@@ -140,7 +140,7 @@ def index():
                 'category':item[6],
 
                 'image':
-                f'http://127.0.0.1:5000/static/uploads/{item[7]}'
+                f'http://3.92.240.108/static/uploads/{item[7]}'
             })
 
 
@@ -665,7 +665,7 @@ def additem():
             'message':'Item Added Successfully',
 
             'image':
-            f'/static/uploads/{filename}'
+            f'http://3.92.240.108/static/uploads/{filename}'
         })
 
 
@@ -775,7 +775,7 @@ def viewallitems():
                 'category':item[6],
 
                 'image':
-                f'http://127.0.0.1:5000/static/uploads/{item[7]}'
+                f'http://3.92.240.108/static/uploads/{item[7]}'
             })
 
 
@@ -904,7 +904,7 @@ def viewitem(itemid):
             'category':item_data[6],
 
             'image':
-            f'http://127.0.0.1:5000/static/uploads/{item_data[7]}'
+            f'http://3.92.240.108/static/uploads/{item_data[7]}'
         }
 
 
@@ -1264,7 +1264,7 @@ def updateitem(itemid):
             'message':'Item Updated Successfully',
 
             'image':
-            f'/static/uploads/{filename}'
+            f'http://3.92.240.108/static/uploads/{filename}'
         })
 
 
@@ -1444,7 +1444,7 @@ def adminprofileupdate():
             'message':'Admin Profile Updated Successfully',
 
             'profile_image':
-            f'/static/uploads/{filename}'
+            f'http://3.92.240.108/static/uploads/{filename}'
         })
 
 
