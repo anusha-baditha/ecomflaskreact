@@ -68,7 +68,7 @@ MAX_CONTENT_LENGTH=6 *1024*1024 #6MB
 
 # mysql connection
 mydb=connection.MySQLConnection(
-    user='root',
+    user='flaskuser',
     password='password',
     host='localhost',
     database='flaskdb'
