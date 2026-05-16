@@ -69,9 +69,9 @@ MAX_CONTENT_LENGTH=6 *1024*1024 #6MB
 # mysql connection
 mydb=connection.MySQLConnection(
     user='root',
-    password='admin',
+    password='password',
     host='localhost',
-    database='ecom22db'
+    database='flaskdb'
 )
 
 # razorpay
@@ -4454,4 +4454,4 @@ def usersearch():
         }), 500
 if __name__=='__main__':
 
-    app.run(debug=True)
+    app.run()
