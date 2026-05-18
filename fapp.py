@@ -105,9 +105,14 @@ def home():
 )
 def index():
 
+    cursor = None
+
     try:
 
-        cursor=mydb.cursor(buffered=True)
+        # Reconnect automatically if MySQL connection is lost
+        mydb.ping(reconnect=True)
+
+        cursor = mydb.cursor(buffered=True)
 
         cursor.execute(
             '''
@@ -124,84 +129,102 @@ def index():
             '''
         )
 
-        allitems_data=cursor.fetchall()
+        allitems_data = cursor.fetchall()
 
-        products=[]
+        products = []
 
         for item in allitems_data:
 
             products.append({
 
-                'itemid':item[0],
+                'itemid': item[0],
 
-                'itemname':item[1],
+                'itemname': item[1],
 
-                'item_desc':item[2],
+                'item_desc': item[2],
 
-                'item_about':item[3],
+                'item_about': item[3],
 
-                'price':float(item[4]),
+                'price': float(item[4]),
 
-                'quantity':item[5],
+                'quantity': item[5],
 
-                'category':item[6],
+                'category': item[6],
 
-                'image':url_for(
+                'image': url_for(
                     'static',
                     filename=f'uploads/{item[7]}',
                     _external=True
                 )
             })
 
-        cursor.close()
-
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'products':products
+            'products': products
         })
 
     except Exception as e:
 
+        print("MYSQL ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
 @app.route(
     '/api/admin/register',
     methods=['POST']
 )
 def admincreate():
 
+    cursor = None
+
     try:
 
-        data=request.get_json()
+        data = request.get_json()
 
         if not data:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'No input data'
-            }),400
+                'message': 'No input data'
+
+            }), 400
 
 
-        admin_name=data.get('username','').strip()
+        admin_name = data.get(
+            'username',
+            ''
+        ).strip()
 
-        admin_email=data.get('useremail','').strip()
+        admin_email = data.get(
+            'useremail',
+            ''
+        ).strip()
 
-        admin_address=data.get('useraddress','').strip()
+        admin_address = data.get(
+            'useraddress',
+            ''
+        ).strip()
 
-        admin_password=data.get(
+        admin_password = data.get(
             'userpassword',
             ''
         ).strip()
 
-        admin_agree=data.get('useragree')
+        admin_agree = data.get('useragree')
 
 
         # validations
@@ -209,13 +232,14 @@ def admincreate():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Username required'
-            }),400
+                'message': 'Username required'
+
+            }), 400
 
 
-        email_pattern=r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 
         if not re.match(
             email_pattern,
@@ -224,31 +248,34 @@ def admincreate():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid email'
-            }),400
+                'message': 'Invalid email'
+
+            }), 400
 
 
-        if len(admin_password)<6:
+        if len(admin_password) < 6:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Password too short'
-            }),400
+                'message': 'Password too short'
+
+            }), 400
 
 
         # hash password
-        hashed_password=bcrypt.generate_password_hash(
+        hashed_password = bcrypt.generate_password_hash(
             admin_password
         ).decode('utf-8')
 
 
-        mydb.reconnect()
+        # reconnect automatically if mysql connection lost
+        mydb.ping(reconnect=True)
 
-        cursor=mydb.cursor(buffered=True)
+        cursor = mydb.cursor(buffered=True)
 
 
         cursor.execute(
@@ -260,42 +287,43 @@ def admincreate():
             [admin_email]
         )
 
-        email_count=cursor.fetchone()[0]
+        email_count = cursor.fetchone()[0]
 
 
-        if email_count>0:
+        if email_count > 0:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Email already exists'
-            }),400
+                'message': 'Email already exists'
 
-
-        gotp=genotp()
+            }), 400
 
 
-        admindata={
+        gotp = genotp()
 
-            'admin_username':admin_name,
 
-            'admin_useremail':admin_email,
+        admindata = {
 
-            'admin_address':admin_address,
+            'admin_username': admin_name,
 
-            'admin_userpassword':hashed_password,
+            'admin_useremail': admin_email,
 
-            'admin_agree':admin_agree,
+            'admin_address': admin_address,
 
-            'admin_otp':gotp
+            'admin_userpassword': hashed_password,
+
+            'admin_agree': admin_agree,
+
+            'admin_otp': gotp
         }
 
 
-        subject='Admin Registration Verification'
+        subject = 'Admin Registration Verification'
 
 
-        body=f'''
+        body = f'''
 Hello Admin,
 
 Your OTP is: {gotp}
@@ -316,93 +344,109 @@ BUYROUTE Team
         )
 
 
-        token=endata(admindata)
+        token = endata(admindata)
 
 
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'message':'OTP sent successfully',
+            'message': 'OTP sent successfully',
 
-            'token':token
+            'token': token
         })
 
 
     except Exception as e:
 
+        print("MYSQL ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
 @app.route(
     '/api/admin/verify-otp',
     methods=['POST']
 )
 def adminotpverify():
 
+    cursor = None
+
     try:
 
-        data=request.get_json()
+        data = request.get_json()
 
         if not data:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'No input data'
-            }),400
+                'message': 'No input data'
+
+            }), 400
 
 
-        userotp=data.get('otp')
+        userotp = data.get('otp')
 
-        token=data.get('token')
+        token = data.get('token')
 
 
         if not userotp or not token:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'OTP and token required'
-            }),400
+                'message': 'OTP and token required'
+
+            }), 400
 
 
         # decrypt token safely
         try:
 
-            admin_details=dndata(token)
+            admin_details = dndata(token)
 
         except Exception:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid or expired token'
-            }),400
+                'message': 'Invalid or expired token'
+
+            }), 400
 
 
         # otp validation
-        if str(userotp)!=str(
+        if str(userotp) != str(
             admin_details['admin_otp']
         ):
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid OTP'
-            }),400
+                'message': 'Invalid OTP'
+
+            }), 400
 
 
-        mydb.reconnect()
+        # reconnect automatically if mysql connection lost
+        mydb.ping(reconnect=True)
 
-        cursor=mydb.cursor(buffered=True)
+        cursor = mydb.cursor(buffered=True)
 
 
         # email recheck
@@ -415,21 +459,22 @@ def adminotpverify():
             [admin_details['admin_useremail']]
         )
 
-        email_exists=cursor.fetchone()[0]
+        email_exists = cursor.fetchone()[0]
 
 
-        if email_exists>0:
+        if email_exists > 0:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Email already registered'
-            }),400
+                'message': 'Email already registered'
+
+            }), 400
 
 
         # already hashed password
-        hashed_password=admin_details[
+        hashed_password = admin_details[
             'admin_userpassword'
         ]
 
@@ -468,51 +513,63 @@ def adminotpverify():
 
         mydb.commit()
 
-        cursor.close()
-
 
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'message':'Admin Registered Successfully'
+            'message': 'Admin Registered Successfully'
         })
 
 
     except Exception as e:
 
+        mydb.rollback()
+
+        print("MYSQL ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
 @app.route(
     '/api/admin/login',
     methods=['POST']
 )
 def adminlogin():
 
+    cursor = None
+
     try:
 
-        data=request.get_json()
+        data = request.get_json()
 
         if not data:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'No input data'
-            }),400
+                'message': 'No input data'
+
+            }), 400
 
 
-        login_email=data.get(
+        login_email = data.get(
             'email',
             ''
         ).strip()
 
-        login_password=data.get(
+        login_password = data.get(
             'password',
             ''
         ).strip()
@@ -522,15 +579,17 @@ def adminlogin():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Email and password required'
-            }),400
+                'message': 'Email and password required'
+
+            }), 400
 
 
-        mydb.reconnect()
+        # reconnect automatically if mysql connection lost
+        mydb.ping(reconnect=True)
 
-        cursor=mydb.cursor(buffered=True)
+        cursor = mydb.cursor(buffered=True)
 
 
         cursor.execute(
@@ -546,26 +605,27 @@ def adminlogin():
             [login_email]
         )
 
-        admin_data=cursor.fetchone()
+        admin_data = cursor.fetchone()
 
 
         if not admin_data:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid Email'
-            }),404
+                'message': 'Invalid Email'
+
+            }), 404
 
 
-        adminid=admin_data[0]
+        adminid = admin_data[0]
 
-        adminname=admin_data[1]
+        adminname = admin_data[1]
 
-        adminemail=admin_data[2]
+        adminemail = admin_data[2]
 
-        stored_password=admin_data[3]
+        stored_password = admin_data[3]
 
 
         if not bcrypt.check_password_hash(
@@ -575,47 +635,54 @@ def adminlogin():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid Password'
-            }),401
+                'message': 'Invalid Password'
 
-
-        session.permanent=True
-
-        session['adminid']=adminid
-
-        session['adminemail']=adminemail
+            }), 401
 
 
-        cursor.close()
+        session.permanent = True
+
+        session['adminid'] = adminid
+
+        session['adminemail'] = adminemail
 
 
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'message':'Login Successful',
+            'message': 'Login Successful',
 
-            'admin':{
+            'admin': {
 
-                'adminid':adminid,
+                'adminid': adminid,
 
-                'adminname':adminname,
+                'adminname': adminname,
 
-                'adminemail':adminemail
+                'adminemail': adminemail
             }
         })
 
 
     except Exception as e:
 
+        print("MYSQL ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
 @app.route(
     '/api/admin/dashboard',
     methods=['GET']
@@ -629,52 +696,62 @@ def admindashboard():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Please login first'
-            }),401
+                'message': 'Please login first'
+
+            }), 401
 
 
         # success response
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'message':'Welcome Admin',
+            'message': 'Welcome Admin',
 
-            'admin':{
+            'admin': {
 
-                'adminid':session.get('adminid'),
+                'adminid': session.get('adminid'),
 
-                'adminemail':session.get('adminemail')
+                'adminemail': session.get('adminemail')
             }
         })
 
 
     except Exception as e:
 
+        print("DASHBOARD ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
-def allowed_file(filename:str)->bool:
+            'message': str(e)
+
+        }), 500
+
+
+
+def allowed_file(filename: str) -> bool:
 
     return (
+
         "." in filename and
-        filename.rsplit('.',1)[1].lower()
+
+        filename.rsplit('.', 1)[1].lower()
+
         in ALLOWED_EXTENSIONS
     )
-
-
 @app.route(
     '/api/admin/add-item',
     methods=['POST']
 )
 def additem():
 
-    save_path=None
+    save_path = None
+
+    cursor = None
 
     try:
 
@@ -683,38 +760,39 @@ def additem():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Please login first'
-            }),401
+                'message': 'Please login first'
+
+            }), 401
 
 
-        item_name=request.form.get(
+        item_name = request.form.get(
             'title',
             ''
         ).strip()
 
-        item_description=request.form.get(
+        item_description = request.form.get(
             'Description',
             ''
         ).strip()
 
-        item_about=request.form.get(
+        item_about = request.form.get(
             'About_item',
             ''
         ).strip()
 
-        item_quantity=request.form.get(
+        item_quantity = request.form.get(
             'quantity',
             ''
         ).strip()
 
-        item_price=request.form.get(
+        item_price = request.form.get(
             'price',
             ''
         ).strip()
 
-        item_category=request.form.get(
+        item_category = request.form.get(
             'category',
             ''
         ).strip()
@@ -725,52 +803,56 @@ def additem():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Item title required'
-            }),400
+                'message': 'Item title required'
+
+            }), 400
 
 
         try:
 
-            item_price=float(item_price)
+            item_price = float(item_price)
 
-            item_quantity=int(item_quantity)
+            item_quantity = int(item_quantity)
 
         except ValueError:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid price or quantity'
-            }),400
+                'message': 'Invalid price or quantity'
+
+            }), 400
 
 
-        item_filedata=request.files.get('file')
+        item_filedata = request.files.get('file')
 
 
         if not item_filedata:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Image required'
-            }),400
+                'message': 'Image required'
+
+            }), 400
 
 
-        filename=item_filedata.filename
+        filename = item_filedata.filename
 
 
         if not allowed_file(filename):
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid file type'
-            }),400
+                'message': 'Invalid file type'
+
+            }), 400
 
 
         if not item_filedata.mimetype.startswith(
@@ -779,21 +861,22 @@ def additem():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid image'
-            }),400
+                'message': 'Invalid image'
 
-
-        orig_secure=secure_filename(filename)
-
-        ext=os.path.splitext(orig_secure)[1]
+            }), 400
 
 
-        filename=genotp()+ext
+        orig_secure = secure_filename(filename)
+
+        ext = os.path.splitext(orig_secure)[1]
 
 
-        save_path=os.path.join(
+        filename = genotp() + ext
+
+
+        save_path = os.path.join(
 
             app.config['UPLOAD_FOLDER'],
 
@@ -804,12 +887,13 @@ def additem():
         item_filedata.save(save_path)
 
 
-        mydb.reconnect()
+        # reconnect automatically if mysql connection lost
+        mydb.ping(reconnect=True)
 
-        cursor=mydb.cursor(buffered=True)
+        cursor = mydb.cursor(buffered=True)
 
 
-        adminid=session.get('adminid')
+        adminid = session.get('adminid')
 
 
         cursor.execute(
@@ -863,16 +947,14 @@ def additem():
 
         mydb.commit()
 
-        cursor.close()
-
 
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'message':'Item Added Successfully',
+            'message': 'Item Added Successfully',
 
-            'image':url_for(
+            'image': url_for(
 
                 'static',
 
@@ -885,6 +967,10 @@ def additem():
 
     except Exception as e:
 
+        mydb.rollback()
+
+        print("ADD ITEM ERROR:", str(e))
+
         # cleanup uploaded file
         if save_path and os.path.exists(save_path):
 
@@ -892,16 +978,25 @@ def additem():
 
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
 
 @app.route(
     '/api/admin/items',
     methods=['GET']
 )
 def viewallitems():
+
+    cursor = None
 
     try:
 
@@ -910,18 +1005,20 @@ def viewallitems():
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Please login first'
-            }),401
+                'message': 'Please login first'
 
-
-        mydb.reconnect()
-
-        cursor=mydb.cursor(buffered=True)
+            }), 401
 
 
-        adminid=session.get('adminid')
+        # reconnect automatically if mysql connection lost
+        mydb.ping(reconnect=True)
+
+        cursor = mydb.cursor(buffered=True)
+
+
+        adminid = session.get('adminid')
 
 
         # fetch items
@@ -946,31 +1043,31 @@ def viewallitems():
         )
 
 
-        allitems_data=cursor.fetchall()
+        allitems_data = cursor.fetchall()
 
 
-        products=[]
+        products = []
 
 
         for item in allitems_data:
 
             products.append({
 
-                'itemid':item[0],
+                'itemid': item[0],
 
-                'itemname':item[1],
+                'itemname': item[1],
 
-                'item_desc':item[2],
+                'item_desc': item[2],
 
-                'item_about':item[3],
+                'item_about': item[3],
 
-                'price':float(item[4]),
+                'price': float(item[4]),
 
-                'quantity':item[5],
+                'quantity': item[5],
 
-                'category':item[6],
+                'category': item[6],
 
-                'image':url_for(
+                'image': url_for(
 
                     'static',
 
@@ -981,33 +1078,38 @@ def viewallitems():
             })
 
 
-        cursor.close()
-
-
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'products':products
+            'products': products
         })
 
 
     except Exception as e:
 
+        print("VIEW ITEMS ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
 
 
+    finally:
 
+        if cursor:
+            cursor.close()
 @app.route(
     '/api/admin/item/<itemid>',
     methods=['GET']
 )
 def viewitem(itemid):
+
+    cursor = None
 
     try:
 
@@ -1016,10 +1118,11 @@ def viewitem(itemid):
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Please login first'
-            }),401
+                'message': 'Please login first'
+
+            }), 401
 
 
         # validate uuid
@@ -1031,18 +1134,20 @@ def viewitem(itemid):
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid item id'
-            }),400
+                'message': 'Invalid item id'
 
-
-        mydb.reconnect()
-
-        cursor=mydb.cursor(buffered=True)
+            }), 400
 
 
-        adminid=session.get('adminid')
+        # reconnect automatically if mysql connection lost
+        mydb.ping(reconnect=True)
+
+        cursor = mydb.cursor(buffered=True)
+
+
+        adminid = session.get('adminid')
 
 
         # fetch single item
@@ -1066,40 +1171,41 @@ def viewitem(itemid):
             AND
                 itemid=UUID_TO_BIN(%s)
             ''',
-            [adminid,itemid]
+            [adminid, itemid]
         )
 
 
-        item_data=cursor.fetchone()
+        item_data = cursor.fetchone()
 
 
         if not item_data:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Item not found'
-            }),404
+                'message': 'Item not found'
+
+            }), 404
 
 
-        product={
+        product = {
 
-            'itemid':item_data[0],
+            'itemid': item_data[0],
 
-            'itemname':item_data[1],
+            'itemname': item_data[1],
 
-            'item_desc':item_data[2],
+            'item_desc': item_data[2],
 
-            'item_about':item_data[3],
+            'item_about': item_data[3],
 
-            'price':float(item_data[4]),
+            'price': float(item_data[4]),
 
-            'quantity':item_data[5],
+            'quantity': item_data[5],
 
-            'category':item_data[6],
+            'category': item_data[6],
 
-            'image':url_for(
+            'image': url_for(
 
                 'static',
 
@@ -1110,25 +1216,31 @@ def viewitem(itemid):
         }
 
 
-        cursor.close()
-
-
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'product':product
+            'product': product
         })
 
 
     except Exception as e:
 
+        print("VIEW ITEM ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
+
+
+    finally:
+
+        if cursor:
+            cursor.close()
 
 
 @app.route(
@@ -1137,6 +1249,8 @@ def viewitem(itemid):
 )
 def deleteitem(itemid):
 
+    cursor = None
+
     try:
 
         # session validation
@@ -1144,10 +1258,11 @@ def deleteitem(itemid):
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Please login first'
-            }),401
+                'message': 'Please login first'
+
+            }), 401
 
 
         # validate uuid
@@ -1159,18 +1274,20 @@ def deleteitem(itemid):
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Invalid item id'
-            }),400
+                'message': 'Invalid item id'
 
-
-        mydb.reconnect()
-
-        cursor=mydb.cursor(buffered=True)
+            }), 400
 
 
-        adminid=session.get('adminid')
+        # reconnect automatically if mysql connection lost
+        mydb.ping(reconnect=True)
+
+        cursor = mydb.cursor(buffered=True)
+
+
+        adminid = session.get('adminid')
 
 
         # fetch item
@@ -1185,26 +1302,27 @@ def deleteitem(itemid):
             AND
                 added_by=%s
             ''',
-            [itemid,adminid]
+            [itemid, adminid]
         )
 
-        item_data=cursor.fetchone()
+        item_data = cursor.fetchone()
 
 
         if not item_data:
 
             return jsonify({
 
-                'status':'failed',
+                'status': 'failed',
 
-                'message':'Item not found'
-            }),404
+                'message': 'Item not found'
 
-
-        image_name=item_data[0]
+            }), 404
 
 
-        remove_path=os.path.join(
+        image_name = item_data[0]
+
+
+        remove_path = os.path.join(
 
             app.config['UPLOAD_FOLDER'],
 
@@ -1222,12 +1340,10 @@ def deleteitem(itemid):
             AND
                 added_by=%s
             ''',
-            [itemid,adminid]
+            [itemid, adminid]
         )
 
         mydb.commit()
-
-        cursor.close()
 
 
         # delete image after db success
@@ -1238,31 +1354,40 @@ def deleteitem(itemid):
 
         return jsonify({
 
-            'status':'success',
+            'status': 'success',
 
-            'message':'Item Deleted Successfully'
+            'message': 'Item Deleted Successfully'
         })
 
 
     except Exception as e:
 
+        mydb.rollback()
+
+        print("DELETE ITEM ERROR:", str(e))
+
         return jsonify({
 
-            'status':'failed',
+            'status': 'failed',
 
-            'message':str(e)
-        }),500
+            'message': str(e)
+
+        }), 500
 
 
+    finally:
 
+        if cursor:
+            cursor.close()
 @app.route(
     '/api/admin/update-item/<itemid>',
     methods=['PUT']
 )
 def updateitem(itemid):
 
-    new_image_path=None
-    old_image_path=None
+    new_image_path = None
+    old_image_path = None
+    cursor = None
 
     try:
 
@@ -1355,7 +1480,8 @@ def updateitem(itemid):
             }),400
 
 
-        mydb.reconnect()
+        mydb.ping(reconnect=True)
+
 
         cursor=mydb.cursor(buffered=True)
 
@@ -1547,6 +1673,9 @@ def updateitem(itemid):
 
 
     except Exception as e:
+        mydb.rollback()
+
+        print("UPDATE ITEM ERROR:", str(e))
 
         # remove newly uploaded image if db fails
         if (
@@ -1563,7 +1692,10 @@ def updateitem(itemid):
 
             'message':str(e)
         }),500
+    finally:
 
+        if cursor:
+            cursor.close()
 
 
 @app.route(
@@ -1616,7 +1748,7 @@ def adminprofileupdate():
             }),400
 
 
-        mydb.reconnect()
+        mydb.ping(reconnect=True)
 
         cursor=mydb.cursor(buffered=True)
 
@@ -1800,6 +1932,9 @@ def adminprofileupdate():
 
 
     except Exception as e:
+        mydb.rollback()
+
+        print("UPDATE Admin ERROR:", str(e))
 
         # remove newly uploaded image if db fails
         if (
@@ -1816,6 +1951,10 @@ def adminprofileupdate():
 
             'message':str(e)
         }),500
+    finally:
+
+        if cursor:
+            cursor.close()
 @app.route(
     '/api/admin/logout',
     methods=['POST']
