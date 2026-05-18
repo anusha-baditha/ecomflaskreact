@@ -921,7 +921,7 @@ def additem():
                 %s,
                 %s,
                 %s,
-                %s,
+                uuid_to_bin(%s),
                 %s
             )
             ''',
@@ -1037,7 +1037,7 @@ def viewallitems():
 
             FROM items
 
-            WHERE added_by=%s
+            WHERE added_by=uuid_to_bin(%s)
             ''',
             [adminid]
         )
@@ -1167,7 +1167,7 @@ def viewitem(itemid):
             FROM items
 
             WHERE
-                added_by=%s
+                added_by=UUID_TO_BIN(%s)
             AND
                 itemid=UUID_TO_BIN(%s)
             ''',
@@ -1300,7 +1300,7 @@ def deleteitem(itemid):
             WHERE
                 itemid=UUID_TO_BIN(%s)
             AND
-                added_by=%s
+                added_by=UUID_TO_BIN(%s)
             ''',
             [itemid, adminid]
         )
@@ -1338,7 +1338,7 @@ def deleteitem(itemid):
             WHERE
                 itemid=UUID_TO_BIN(%s)
             AND
-                added_by=%s
+                added_by=UUID_TO_BIN(%s)
             ''',
             [itemid, adminid]
         )
@@ -1499,7 +1499,7 @@ def updateitem(itemid):
             FROM items
 
             WHERE
-                added_by=%s
+                added_by=UUID_TO_BIN(%s)
             AND
                 itemid=UUID_TO_BIN(%s)
             ''',
@@ -1613,7 +1613,7 @@ def updateitem(itemid):
                 item_img=%s
 
             WHERE
-                added_by=%s
+                added_by=UUID_TO_BIN(%s)
             AND
                 itemid=UUID_TO_BIN(%s)
             ''',
@@ -1769,7 +1769,7 @@ def adminprofileupdate():
 
             FROM admindata
 
-            WHERE adminid=%s
+            WHERE adminid=UUID_TO_BIN(%s)
             ''',
             [adminid]
         )
@@ -1882,7 +1882,7 @@ def adminprofileupdate():
                 admin_phoneno=%s,
                 admin_imgdata=%s
 
-            WHERE adminid=%s
+            WHERE adminid=UUID_TO_BIN(%s)
             ''',
             [
 
