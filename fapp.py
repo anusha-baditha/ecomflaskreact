@@ -1,8 +1,10 @@
 from flask import Flask,request,jsonify,session,make_response,url_for
 from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_session import Session
 from flask_bcrypt import Bcrypt
 from mysql.connector import connection
+
 from cmail import send_mail 
 from otp import genotp
 import os
@@ -32,7 +34,11 @@ from datetime import timedelta
 
 import re
 import os
-app=Flask(__name__)
+app = Flask(__name__)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 app.permanent_session_lifetime=timedelta(days=1)
 # enable react connection
 CORS(
