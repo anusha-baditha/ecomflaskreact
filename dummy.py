@@ -80,10 +80,10 @@ MAX_CONTENT_LENGTH=6 *1024*1024 #6MB
 
 # mysql connection
 mydb=connection.MySQLConnection(
-    user='flaskuser',
-    password='password',
+    user='root',
+    password='admin',
     host='localhost',
-    database='flaskdb'
+    database='ecom22db'
 )
 
 # razorpay
